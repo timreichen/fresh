@@ -9,12 +9,13 @@ import {
   type AsyncAnyComponent,
   renderMiddleware,
 } from "./render_middleware.ts";
-import { type Method, pathToPattern } from "../../router.ts";
+import type { Method } from "../../router.ts";
 import { type HandlerFn, isHandlerByMethod } from "../../handlers.ts";
 import { type FsAdapter, fsAdapter } from "../../fs.ts";
 import { HttpError } from "../../error.ts";
 import { parseRootPath } from "../../config.ts";
 import type { FreshReqContext, PageProps } from "../../context.ts";
+import { pathToPattern } from "../../utils.ts";
 
 const TEST_FILE_PATTERN = /[._]test\.(?:[tj]sx?|[mc][tj]s)$/;
 const GROUP_REG = /(^|[/\\\\])\((_[^/\\\\]+)\)[/\\\\]/;
