@@ -7,7 +7,13 @@ import { DENO_DEPLOYMENT_ID } from "./runtime/build_id.ts";
 import * as colors from "@std/fmt/colors";
 import { type MiddlewareFn, runMiddlewares } from "./middlewares/mod.ts";
 import { FreshReqContext } from "./context.ts";
-import { type Method, type Router, UrlPatternRouter } from "./router.ts";
+import {
+  type Method,
+  middlewaresSymbol,
+  type Router,
+  routesSymbol,
+  UrlPatternRouter,
+} from "./router.ts";
 import {
   type FreshConfig,
   normalizeConfig,
@@ -201,19 +207,19 @@ export class App<State> {
   }
 
   mountApp(path: string, app: App<State>): this {
-    const routes = app.#router._routes;
+    const routes = app.#router[routesSymbol];
     app.#islandRegistry.forEach((value, key) => {
       this.#islandRegistry.set(key, value);
     });
 
-    const middlewares = app.#router._middlewares;
+    const middlewares = app.#router[middlewaresSymbol];
 
     // Special case when user calls one of these:
     // - `app.mountApp("/", otherApp)`
     // - `app.mountApp("/*", otherApp)`
     const isSelf = path === "/*" || path === "/";
     if (isSelf && middlewares.length > 0) {
-      this.#router._middlewares.push(...middlewares);
+      this.#router[middlewaresSymbol].push(...middlewares);
     }
 
     for (let i = 0; i < routes.length; i++) {
