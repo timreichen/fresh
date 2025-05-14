@@ -3,7 +3,7 @@ import { contentType as getContentType } from "@std/media-types/content-type";
 import type { MiddlewareFn } from "./mod.ts";
 import { ASSET_CACHE_BUST_KEY } from "../runtime/shared_internal.tsx";
 import { BUILD_ID } from "../runtime/build_id.ts";
-import { getBuildCache } from "../context.ts";
+import { buildCacheSymbol } from "../build_cache.ts";
 import { trace, tracer } from "../otel.ts";
 
 /**
@@ -15,8 +15,7 @@ import { trace, tracer } from "../otel.ts";
  */
 export function staticFiles<T>(): MiddlewareFn<T> {
   return async function freshStaticFiles(ctx) {
-    const { req, url, config } = ctx;
-    const buildCache = getBuildCache(ctx);
+    const { req, url, config, [buildCacheSymbol]: buildCache } = ctx;
 
     let pathname = decodeURIComponent(url.pathname);
     if (config.basePath) {

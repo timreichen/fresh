@@ -15,6 +15,7 @@ import { PartialInIsland } from "./fixtures_islands/PartialInIsland.tsx";
 import { JsonIsland } from "./fixtures_islands/JsonIsland.tsx";
 import { FakeServer } from "../src/test_utils.ts";
 import { Partial } from "fresh/runtime";
+import { buildCacheSymbol } from "../src/build_cache.ts";
 
 await buildProd(allIslandApp);
 
@@ -28,7 +29,7 @@ function testApp<T>(): App<T> {
     .island(partialInIsland, "PartialInIsland", PartialInIsland)
     .island(jsonIsland, "JsonIsland", JsonIsland)
     .use(staticFiles());
-  app.buildCache = allIslandApp.buildCache;
+  app[buildCacheSymbol] = allIslandApp[buildCacheSymbol];
   return app;
 }
 

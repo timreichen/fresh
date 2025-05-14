@@ -8,7 +8,7 @@ import {
 import { renderToString } from "preact-render-to-string";
 import { SpanStatusCode } from "@opentelemetry/api";
 import type { ResolvedFreshConfig } from "./config.ts";
-import type { BuildCache } from "./build_cache.ts";
+import { type BuildCache, buildCacheSymbol } from "./build_cache.ts";
 import {
   FreshScripts,
   RenderState,
@@ -31,6 +31,7 @@ export type ServerIslandRegistry = Map<ComponentType, Island>;
  * The context passed to every middleware. It is unique for every request.
  */
 export interface FreshContext<State = unknown> {
+  [buildCacheSymbol]: BuildCache;
   /** Reference to the resolved Fresh configuration */
   readonly config: ResolvedFreshConfig;
   readonly state: State;
@@ -86,8 +87,6 @@ export interface FreshContext<State = unknown> {
   render(vnode: VNode, init?: ResponseInit): Response | Promise<Response>;
 }
 
-export let getBuildCache: (ctx: FreshContext<unknown>) => BuildCache;
-
 export class FreshReqContext<State>
   implements FreshContext<State>, PageProps<unknown, State> {
   config: ResolvedFreshConfig;
@@ -102,14 +101,10 @@ export class FreshReqContext<State>
   next: FreshContext<State>["next"];
 
   #islandRegistry: ServerIslandRegistry;
-  #buildCache: BuildCache;
+  [buildCacheSymbol]: BuildCache;
 
   // FIXME: remove after switching to <Slot />
   Component!: FunctionComponent;
-
-  static {
-    getBuildCache = (ctx) => (ctx as FreshReqContext<unknown>).#buildCache;
-  }
 
   constructor(
     req: Request,
@@ -128,7 +123,7 @@ export class FreshReqContext<State>
     this.config = config;
     this.next = next;
     this.#islandRegistry = islandRegistry;
-    this.#buildCache = buildCache;
+    this[buildCacheSymbol] = buildCache;
   }
 
   redirect(pathOrUrl: string, status = 302): Response {
@@ -193,7 +188,7 @@ export class FreshReqContext<State>
           vnode,
           this,
           this.#islandRegistry,
-          this.#buildCache,
+          this[buildCacheSymbol],
           partialId,
           headers,
         );

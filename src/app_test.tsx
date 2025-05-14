@@ -1,7 +1,7 @@
 import { expect } from "@std/expect";
 import { App } from "./app.ts";
 import { FakeServer } from "./test_utils.ts";
-import { ProdBuildCache } from "./build_cache.ts";
+import { buildCacheSymbol, ProdBuildCache } from "./build_cache.ts";
 
 Deno.test("FreshApp - .use()", async () => {
   const app = new App<{ text: string }>()
@@ -422,7 +422,7 @@ Deno.test.ignore("FreshApp - finish setup", async () => {
       return ctx.render(<div>ok</div>);
     });
 
-  app.buildCache = await ProdBuildCache.fromSnapshot({
+  app[buildCacheSymbol] = await ProdBuildCache.fromSnapshot({
     ...app.config,
     build: { outDir: "foo" },
   }, app.islandRegistry.size);

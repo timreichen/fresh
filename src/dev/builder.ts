@@ -17,6 +17,7 @@ import { BUILD_ID } from "../runtime/build_id.ts";
 import { updateCheck } from "./update_check.ts";
 import { DAY } from "@std/datetime";
 import { devErrorOverlay } from "./middlewares/error_overlay/middleware.tsx";
+import { buildCacheSymbol } from "../build_cache.ts";
 
 export interface BuildOptions {
   /**
@@ -66,7 +67,7 @@ export class Builder implements FreshBuilder {
 
     devApp.config.mode = "development";
 
-    devApp.buildCache = new MemoryBuildCache(
+    devApp[buildCacheSymbol] = new MemoryBuildCache(
       devApp.config,
       BUILD_ID,
       this.#transformer,
@@ -81,7 +82,7 @@ export class Builder implements FreshBuilder {
   }
 
   async build<T>(app: App<T>): Promise<void> {
-    app.buildCache = new DiskBuildCache(
+    app[buildCacheSymbol] = new DiskBuildCache(
       app.config,
       BUILD_ID,
       this.#transformer,
@@ -108,7 +109,7 @@ export class Builder implements FreshBuilder {
       // Ignore
     }
 
-    const buildCache = app.buildCache! as
+    const buildCache = app[buildCacheSymbol]! as
       | MemoryBuildCache
       | DiskBuildCache;
 

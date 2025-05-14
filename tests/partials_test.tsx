@@ -23,6 +23,7 @@ import { OptOutPartialLink } from "./fixtures_islands/OptOutPartialLink.tsx";
 import * as path from "@std/path";
 
 import { retry } from "@std/async/retry";
+import { buildCacheSymbol } from "../src/build_cache.ts";
 
 const loremIpsum = await Deno.readTextFile(
   path.join(import.meta.dirname!, "lorem_ipsum.txt"),
@@ -43,7 +44,7 @@ function testApp<T>(): App<T> {
     .island(optOutPartialLink, "OptOutPartialLink", OptOutPartialLink)
     .use(staticFiles());
 
-  app.buildCache = allIslandApp.buildCache;
+  app[buildCacheSymbol] = allIslandApp[buildCacheSymbol];
   return app;
 }
 

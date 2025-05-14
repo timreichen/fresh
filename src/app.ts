@@ -18,7 +18,11 @@ import {
   normalizeConfig,
   type ResolvedFreshConfig,
 } from "./config.ts";
-import { type BuildCache, ProdBuildCache } from "./build_cache.ts";
+import {
+  type BuildCache,
+  buildCacheSymbol,
+  ProdBuildCache,
+} from "./build_cache.ts";
 import type { ServerIslandRegistry } from "./context.ts";
 import { FinishSetup, ForgotBuild } from "./finish_setup.tsx";
 import { HttpError } from "./error.ts";
@@ -52,7 +56,7 @@ export class App<State> {
     MiddlewareFn<State>
   >();
   #islandRegistry: ServerIslandRegistry = new Map();
-  buildCache: BuildCache | null = null;
+  [buildCacheSymbol]: BuildCache | null = null;
   #islandNames = new Set<string>();
 
   get router(): Router<MiddlewareFn<State>> {
@@ -170,15 +174,16 @@ export class App<State> {
   async handler(): Promise<
     (request: Request, info?: Deno.ServeHandlerInfo) => Promise<Response>
   > {
-    if (this.buildCache === null) {
-      this.buildCache = await ProdBuildCache.fromSnapshot(
+    if (this[buildCacheSymbol] === null) {
+      this[buildCacheSymbol] = await ProdBuildCache.fromSnapshot(
         this.config,
         this.#islandRegistry.size,
       );
     }
 
     if (
-      !this.buildCache.hasSnapshot && this.config.mode === "production" &&
+      !this[buildCacheSymbol].hasSnapshot &&
+      this.config.mode === "production" &&
       DENO_DEPLOYMENT_ID !== undefined
     ) {
       return missingBuildHandler;
@@ -208,7 +213,7 @@ export class App<State> {
         this.config,
         next,
         this.#islandRegistry,
-        this.buildCache!,
+        this[buildCacheSymbol]!,
       );
 
       const span = trace.getActiveSpan();

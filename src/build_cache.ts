@@ -22,6 +22,8 @@ export interface StaticFile {
   close(): void;
 }
 
+export const buildCacheSymbol = Symbol("buildCache");
+
 export interface BuildCache {
   hasSnapshot: boolean;
   readFile(pathname: string): Promise<StaticFile | null>;

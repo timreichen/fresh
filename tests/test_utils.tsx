@@ -7,7 +7,7 @@ import { TextLineStream } from "@std/streams/text-line-stream";
 import * as path from "@std/path";
 import type { ComponentChildren } from "preact";
 import { expect } from "@std/expect";
-import { ProdBuildCache } from "../src/build_cache.ts";
+import { buildCacheSymbol, ProdBuildCache } from "../src/build_cache.ts";
 import { Counter } from "./fixtures_islands/Counter.tsx";
 import { CounterWithSlots } from "./fixtures_islands/CounterWithSlots.tsx";
 import { EscapeIsland } from "./fixtures_islands/EscapeIsland.tsx";
@@ -71,7 +71,7 @@ export async function buildProd(app: App<unknown>) {
     app.config,
     app.islandRegistry.size,
   );
-  app.buildCache = cache;
+  app[buildCacheSymbol] = cache;
 }
 
 export async function withBrowserApp(

@@ -29,12 +29,13 @@ import * as path from "@std/path";
 import type { FreshConfig } from "../src/config.ts";
 import { FreshAttrs } from "./fixtures_islands/FreshAttrs.tsx";
 import { FakeServer } from "../src/test_utils.ts";
+import { buildCacheSymbol } from "../src/build_cache.ts";
 
 await buildProd(allIslandApp);
 
 function testApp(config?: FreshConfig) {
   const app = new App(config);
-  app.buildCache = allIslandApp.buildCache;
+  app[buildCacheSymbol] = allIslandApp[buildCacheSymbol];
   return app;
 }
 
